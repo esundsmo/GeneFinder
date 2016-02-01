@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 YOUR HEADER COMMENT HERE
+First 6 functions have been written, and the 7th was attempted.
+I dont understand doctesting and its implementation.
+I'll make sure i have it down before the whole project is due.
+Current code was tested using the pythontutor visualization site.
 
-@author: YOUR NAME HERE
+@author: Elizabeth Sundsmo
 
 """
 
@@ -30,8 +34,23 @@ def get_complement(nucleotide):
     >>> get_complement('C')
     'G'
     """
-    # TODO: implement this
-    pass
+    if nucleotide == 'A':
+        return 'T'
+    
+    elif nucleotide == 'T':
+        return 'A'
+
+    elif nucleotide == 'C':
+        return 'G' 
+
+    elif nucleotide == 'G':
+        return 'C'
+
+    else:
+        return -1
+
+
+
 
 
 def get_reverse_complement(dna):
@@ -45,8 +64,14 @@ def get_reverse_complement(dna):
     >>> get_reverse_complement("CCGCGTTCA")
     'TGAACGCGG'
     """
-    # TODO: implement this
-    pass
+
+    i = -1
+    reverse_complement = ''
+
+    while i >= -len(dna):
+        reverse_complement+=(get_complement(dna[i]))
+        i += -1
+    return reverse_complement
 
 
 def rest_of_ORF(dna):
@@ -62,8 +87,21 @@ def rest_of_ORF(dna):
     >>> rest_of_ORF("ATGAGATAGG")
     'ATGAGA'
     """
-    # TODO: implement this
-    pass
+    i = 0
+    i2 = 3
+        
+    while i < len(dna):
+        if dna[i:i2] == 'TAA':
+            return dna[:i]
+        elif dna[i:i2] == 'TAG':
+            return dna[:i]
+        elif dna[i:i2] == 'TGA':
+            return dna[:i]
+        i+=3
+        i2+=3
+            
+        if i2> len(dna):
+           return dna
 
 
 def find_all_ORFs_oneframe(dna):
@@ -79,8 +117,25 @@ def find_all_ORFs_oneframe(dna):
     >>> find_all_ORFs_oneframe("ATGCATGAATGTAGATAGATGTGCCC")
     ['ATGCATGAATGTAGA', 'ATGTGCCC']
     """
-    # TODO: implement this
-    pass
+    
+    all_ORFs = []
+    count = 0
+    i = 0
+    i2 = 3
+
+    while i < len(dna):
+        if dna[i:i2] == 'ATG':
+            dna_piece = dna[i:]
+            all_ORFs.append(rest_of_ORF(dna_piece))
+            
+            i+=3+len(all_ORFs[count])
+            i2= i+3
+            count +=1
+        else :    
+            i +=3
+            i2+=3
+
+    return all_ORFs
 
 
 def find_all_ORFs(dna):
@@ -96,9 +151,13 @@ def find_all_ORFs(dna):
     >>> find_all_ORFs("ATGCATGAATGTAG")
     ['ATGCATGAATGTAG', 'ATGAATGTAG', 'ATG']
     """
-    # TODO: implement this
-    pass
+    all_ORFs = []
 
+    all_ORFs.extend(find_all_ORFs_oneframe(dna[0:]))
+    all_ORFs.extend(find_all_ORFs_oneframe(dna[1:]))
+    all_ORFs.extend(find_all_ORFs_oneframe(dna[2:]))
+    
+    return all_ORFs
 
 def find_all_ORFs_both_strands(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence on both
@@ -109,9 +168,12 @@ def find_all_ORFs_both_strands(dna):
     >>> find_all_ORFs_both_strands("ATGCGAATGTAGCATCAAA")
     ['ATGCGAATG', 'ATGCTACATTCGCAT']
     """
-    # TODO: implement this
-    pass
+    all_ORFs_both_strands = []
 
+    all_ORFs_both_strands.extend(find_all_ORFs(dna))
+    all_ORFs_both_strands.extend(find_all_ORFs(get_reverse_complement(dna))
+
+    return all_ORFs_both_strands
 
 def longest_ORF(dna):
     """ Finds the longest ORF on both strands of the specified DNA and returns it
@@ -119,8 +181,16 @@ def longest_ORF(dna):
     >>> longest_ORF("ATGCGAATGTAGCATCAAA")
     'ATGCTACATTCGCAT'
     """
-    # TODO: implement this
-    pass
+    all_strands = find_all_ORFs_both_strands(dna)
+    i=1
+    big = all_strands[0]
+
+    while i < len(all_strands):
+        if len(all_strands[i]) > len(all_strands[i-1]):
+            big = all_strands[i+1]
+        i+=1
+
+    return big 
 
 
 def longest_ORF_noncoding(dna, num_trials):
