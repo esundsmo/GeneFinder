@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 YOUR HEADER COMMENT HERE
-First 6 functions have been written, and the 7th was attempted.
-I dont understand doctesting and its implementation.
-I'll make sure i have it down before the whole project is due.
-Current code was tested using the pythontutor visualization site.
+
+Some updates have been made at the suggestion of a ninja to streamline code.
+All parts have been attempted. Need to develop doctests for all functions (beyond those given)
+gene_finder and coding_strand_to_AA have not been fully implemented-- need more testing.
 
 @author: Elizabeth Sundsmo
 
@@ -91,11 +91,7 @@ def rest_of_ORF(dna):
     i2 = 3
         
     while i < len(dna):
-        if dna[i:i2] == 'TAA':
-            return dna[:i]
-        elif dna[i:i2] == 'TAG':
-            return dna[:i]
-        elif dna[i:i2] == 'TGA':
+    	if dna[i:i2] in ['TAA', 'TAG', 'TGA']:
             return dna[:i]
         i+=3
         i2+=3
@@ -171,7 +167,7 @@ def find_all_ORFs_both_strands(dna):
     all_ORFs_both_strands = []
 
     all_ORFs_both_strands.extend(find_all_ORFs(dna))
-    all_ORFs_both_strands.extend(find_all_ORFs(get_reverse_complement(dna))
+    all_ORFs_both_strands.extend(find_all_ORFs(get_reverse_complement(dna)))
 
     return all_ORFs_both_strands
 
@@ -182,12 +178,12 @@ def longest_ORF(dna):
     'ATGCTACATTCGCAT'
     """
     all_strands = find_all_ORFs_both_strands(dna)
-    i=1
+    i = 1
     big = all_strands[0]
 
     while i < len(all_strands):
         if len(all_strands[i]) > len(all_strands[i-1]):
-            big = all_strands[i+1]
+            big = all_strands[i]
         i+=1
 
     return big 
@@ -199,9 +195,17 @@ def longest_ORF_noncoding(dna, num_trials):
 
         dna: a DNA sequence
         num_trials: the number of random shuffles
-        returns: the maximum length longest ORF """
-    # TODO: implement this
-    pass
+        returns: the maximum length longest ORF 
+        
+    """
+
+    returns = ''
+    t = 0
+    while t < num_trials:
+    		if returns < longest_ORF(shuffle_string(dna)):
+    			returns = longest_ORF(shuffle_string(dna))
+    		t+=1
+    return returns
 
 
 def coding_strand_to_AA(dna):
@@ -218,8 +222,18 @@ def coding_strand_to_AA(dna):
         >>> coding_strand_to_AA("ATGCCCGCTTT")
         'MPA'
     """
-    # TODO: implement this
-    pass
+    
+    returns = ''
+    i = 0
+    i2 = 3
+        
+    while i < len(dna):
+    	returns += aa_table[dna[i:i2]]
+        i+=3
+        i2+=3
+            
+        if i2> len(dna):
+           return returns
 
 
 def gene_finder(dna):
@@ -227,10 +241,23 @@ def gene_finder(dna):
 
         dna: a DNA sequence
         returns: a list of all amino acid sequences coded by the sequence dna.
+        
+        >>> gene_finder("ATGCGAATGTAGCATCAAA")
+        ['MRM', 'MLHSH']
+
+
     """
-    # TODO: implement this
-    pass
+
+    filter_aa_length = longest_ORF_noncoding(dna, 1500)
+    long_ORF = longest_ORF(dna) 
+    returns = []
+
+    while i < len(long_ORF):
+        if len(long_ORF[i]) > filter_aa_length:
+    	    returns.append.coding_strand_to_AA(long_ORF[i])
+
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod()
+    #doctest.testmod()
+    doctest.run_docstring_examples(gene_finder, globals(), verbose=True)
