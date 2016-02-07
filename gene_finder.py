@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-YOUR HEADER COMMENT HERE
+Need to develop more doctests for all functions (beyond those given)
 
-Some updates have been made at the suggestion of a ninja to streamline code.
-All parts have been attempted. Need to develop doctests for all functions (beyond those given)
-gene_finder and coding_strand_to_AA have not been fully implemented-- need more testing.
 
 @author: Elizabeth Sundsmo
 
@@ -12,7 +9,7 @@ gene_finder and coding_strand_to_AA have not been fully implemented-- need more 
 
 import random
 from amino_acids import aa, codons, aa_table   # you may find these useful
-from load import load_seq
+from load import load_seq #this is a function, give a FASTA file to read DNA seq
 
 
 def shuffle_string(s):
@@ -177,7 +174,9 @@ def longest_ORF(dna):
     >>> longest_ORF("ATGCGAATGTAGCATCAAA")
     'ATGCTACATTCGCAT'
     """
+    
     all_strands = find_all_ORFs_both_strands(dna)
+    big = ''
     i = 1
     big = all_strands[0]
 
@@ -185,7 +184,7 @@ def longest_ORF(dna):
         if len(all_strands[i]) > len(all_strands[i-1]):
             big = all_strands[i]
         i+=1
-
+    
     return big 
 
 
@@ -196,15 +195,15 @@ def longest_ORF_noncoding(dna, num_trials):
         dna: a DNA sequence
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF 
-        
     """
-
+    #print type(longest_ORF(shuffle_string(dna)))
     returns = ''
     t = 0
     while t < num_trials:
-    		if returns < longest_ORF(shuffle_string(dna)):
-    			returns = longest_ORF(shuffle_string(dna))
-    		t+=1
+    	shuffled = longest_ORF(shuffle_string(dna))
+        if len(shuffled) > len(returns):
+    	    returns = shuffled
+        t+=1
     return returns
 
 
@@ -216,11 +215,19 @@ def coding_strand_to_AA(dna):
         dna: a DNA sequence represented as a string
         returns: a string containing the sequence of amino acids encoded by the
                  the input DNA fragment
-
+        
         >>> coding_strand_to_AA("ATGCGA")
         'MR'
         >>> coding_strand_to_AA("ATGCCCGCTTT")
         'MPA'
+        >>> coding_strand_to_AA("ATGCGA")
+        'MR'
+        >>> coding_strand_to_AA("ATGCCCGCTTT")
+        'MPA'
+        >>> coding_strand_to_AA("ATGCGAATG")
+        'MRM'
+        >>> coding_strand_to_AA("ATGCTACATTCGCAT")
+        'MLHSH'
     """
     
     returns = ''
@@ -247,17 +254,28 @@ def gene_finder(dna):
 
 
     """
-
-    filter_aa_length = longest_ORF_noncoding(dna, 1500)
-    long_ORF = longest_ORF(dna) 
+    print 'Finding threshold...'
+    threshold = len(longest_ORF_noncoding(dna, 1500))
+    print threshold
+    
+    all_ORFs = find_all_ORFs_both_strands(dna) 
     returns = []
+    i=0
 
-    while i < len(long_ORF):
-        if len(long_ORF[i]) > filter_aa_length:
-    	    returns.append.coding_strand_to_AA(long_ORF[i])
+    print 'Entering while loop... '
+    while i < len(all_ORFs):
+        if len(all_ORFs[i]) >= threshold:
+    	    returns.append(coding_strand_to_AA(all_ORFs[i]))
+    	    print 'Added sequence'
+        i+=1
+
+    print str(len(returns)) + 'sequences added: \n'
+    print returns
 
 
 if __name__ == "__main__":
     import doctest
     #doctest.testmod()
-    doctest.run_docstring_examples(gene_finder, globals(), verbose=True)
+    #doctest.run_docstring_examples(coding_strand_to_AA, globals(), verbose=True)
+
+gene_finder(load_seq("./data/X73525.fa"))
