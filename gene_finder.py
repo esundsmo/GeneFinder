@@ -1,7 +1,22 @@
 # -*- coding: utf-8 -*-
 """
-Need to develop more doctests for all functions (beyond those given)
+Takes a piece of DNA from FASTA file thought to contain proteins,
+and returns a list of amino acid strings that are likely protein candidates 
+that can be identified on BLAST. The screaning process looks for start and 
+stop codons, as well as a minimum length, determined by scrambling the input
+DNA sequence and looking for the longest non-coding protein (anything longer)
+than the non-coding protein is likely not by chance).
 
+This code is currently set up to identify proteins from a piece of salmonella
+DNA. 
+
+BLAST search: http://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastp&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome
+
+Notes on the code: The first 6 functions were tested using a python visualization
+site since I didn't understand doctest implementation at the time. The final
+functions were tested via doctests (in each function, modified final call to 
+current function) and running the code with print statements in the terminal
+and sublime build box (Ctrl+B).
 
 @author: Elizabeth Sundsmo
 
@@ -32,23 +47,15 @@ def get_complement(nucleotide):
     'G'
     """
     if nucleotide == 'A':
-        return 'T'
-    
+        return 'T'  
     elif nucleotide == 'T':
         return 'A'
-
     elif nucleotide == 'C':
         return 'G' 
-
     elif nucleotide == 'G':
         return 'C'
-
     else:
         return -1
-
-
-
-
 
 def get_reverse_complement(dna):
     """ Computes the reverse complementary sequence of DNA for the specfied DNA
@@ -61,7 +68,6 @@ def get_reverse_complement(dna):
     >>> get_reverse_complement("CCGCGTTCA")
     'TGAACGCGG'
     """
-
     i = -1
     reverse_complement = ''
 
@@ -69,7 +75,6 @@ def get_reverse_complement(dna):
         reverse_complement+=(get_complement(dna[i]))
         i += -1
     return reverse_complement
-
 
 def rest_of_ORF(dna):
     """ Takes a DNA sequence that is assumed to begin with a start
@@ -95,7 +100,6 @@ def rest_of_ORF(dna):
             
         if i2> len(dna):
            return dna
-
 
 def find_all_ORFs_oneframe(dna):
     """ Finds all non-nested open reading frames in the given DNA
@@ -130,7 +134,6 @@ def find_all_ORFs_oneframe(dna):
 
     return all_ORFs
 
-
 def find_all_ORFs(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence in
         all 3 possible frames and returns them as a list.  By non-nested we
@@ -162,7 +165,6 @@ def find_all_ORFs_both_strands(dna):
     ['ATGCGAATG', 'ATGCTACATTCGCAT']
     """
     all_ORFs_both_strands = []
-
     all_ORFs_both_strands.extend(find_all_ORFs(dna))
     all_ORFs_both_strands.extend(find_all_ORFs(get_reverse_complement(dna)))
 
@@ -173,8 +175,7 @@ def longest_ORF(dna):
         as a string
     >>> longest_ORF("ATGCGAATGTAGCATCAAA")
     'ATGCTACATTCGCAT'
-    """
-    
+    """  
     all_strands = find_all_ORFs_both_strands(dna)
     big = ''
     i = 1
@@ -186,7 +187,6 @@ def longest_ORF(dna):
         i+=1
     
     return big 
-
 
 def longest_ORF_noncoding(dna, num_trials):
     """ Computes the maximum length of the longest ORF over num_trials shuffles
@@ -205,7 +205,6 @@ def longest_ORF_noncoding(dna, num_trials):
     	    returns = shuffled
         t+=1
     return returns
-
 
 def coding_strand_to_AA(dna):
     """ Computes the Protein encoded by a sequence of DNA.  This function
@@ -229,7 +228,6 @@ def coding_strand_to_AA(dna):
         >>> coding_strand_to_AA("ATGCTACATTCGCAT")
         'MLHSH'
     """
-    
     returns = ''
     i = 0
     i2 = 3
@@ -237,11 +235,8 @@ def coding_strand_to_AA(dna):
     while i < len(dna):
     	returns += aa_table[dna[i:i2]]
         i+=3
-        i2+=3
-            
-        if i2> len(dna):
-           return returns
-
+        i2+=3         
+    return returns
 
 def gene_finder(dna):
     """ Returns the amino acid sequences that are likely coded by the specified dna
@@ -251,8 +246,6 @@ def gene_finder(dna):
         
         >>> gene_finder("ATGCGAATGTAGCATCAAA")
         ['MRM', 'MLHSH']
-
-
     """
     print 'Finding threshold...'
     threshold = len(longest_ORF_noncoding(dna, 1500))
